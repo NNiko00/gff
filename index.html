@@ -39,11 +39,35 @@ button.action{background:#1f5fc2;color:white;border:0;padding:10px 14px;border-r
 .fold-body{padding:0 16px 13px 16px}.trend-panel .chartPanel{margin:0;border:none;box-shadow:none;padding:0}.trend-note{font-size:11px;color:#667891;line-height:1.55;margin-top:6px}
 .limit-tag{font-size:11px;color:#62748c}
 
+/* 16:9 compact presentation */
+html,body{height:100%}.shell{max-width:none;padding:8px 12px;height:100vh;display:flex;flex-direction:column;gap:6px}header{margin:0;min-height:26px}h1{font-size:18px}.layout{flex:1;min-height:0;grid-template-columns:285px minmax(0,1fr);gap:8px}.panel{padding:10px;max-height:100%;font-size:12px}.work{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:6px}.shift-panel{padding:7px 10px;margin:0;border-radius:8px}.shift-header h2{font-size:13px}.shift-grid{gap:16px}.shift-control{grid-template-columns:minmax(0,1fr) 110px}.shift-control label{margin:3px 0;font-size:11px}input,select{padding:5px}.shift-control input[type=number]{padding:4px}.buttonrow{gap:6px}button.secondary,button.action,.toggle-config{padding:5px 9px;font-size:11px}.shift-note,.note,.optics-note,.trend-note,.foot{display:none}.metrics{display:flex;gap:6px;margin:0}.metrics .metric{flex:1;padding:6px 9px;border-radius:8px}.metric .name,.metric .name.formula{font-size:10px;line-height:1.3}.metric .value{font-size:19px;margin-top:3px}.chartPanel{padding:7px 10px;margin:0;border-radius:8px;flex:1;min-height:120px;display:flex;flex-direction:column}.chartHeading{margin-bottom:2px}.chartHeading strong{font-size:12px}.chart,.chart.bottom{height:100%;min-height:85px;flex:1}.legend{gap:9px;font-size:10px}.fold-panel{margin:0;border-radius:8px;flex-shrink:0}.fold-panel>summary{padding:6px 10px;font-size:12px}.fold-panel .summary-mini{font-size:10px}.fold-body{padding:0 10px 8px}.optics-layout{grid-template-columns:1fr 1.2fr;gap:10px}.optics-drawing{height:155px}.optics-controls{gap:4px}.reading>div{padding:4px 6px}.reading b{font-size:12px}.trend-panel .chart{height:180px;flex:auto}.trend-panel .chartPanel{min-height:0}.optics-advanced{padding:5px 8px}.error{margin:4px 0;padding:4px 7px}
+@media(max-width:650px){.layout{grid-template-columns:230px minmax(0,1fr)}.metrics{flex-wrap:wrap}.metrics .metric{min-width:100px}.optics-layout{grid-template-columns:1fr}.shift-grid{gap:8px}.shift-control{grid-template-columns:1fr 85px}h1{font-size:15px}}
+.reading{grid-template-columns:repeat(2,minmax(0,1fr))}.curve-fold{background:#fff;border:1px solid #dbe3ee;border-radius:8px;flex:1;min-height:140px;overflow:hidden}.curve-fold>summary{padding:7px 10px;cursor:pointer;list-style:none;margin:0;user-select:none}.curve-fold>summary::-webkit-details-marker{display:none}.curve-fold>summary strong{margin-right:auto}.fold-hint{font-size:10px;color:#607086;white-space:nowrap}.curve-fold:not([open]){flex:0 0 auto;min-height:0}.curve-body{height:calc(100% - 30px);min-height:100px;padding:0 10px 7px}.curve-body>.chart{height:100%;width:100%;display:block}
+/* Red presentation theme */
+:root{color:#38252a;background:#faf5f5;accent-color:#bd283c}
+.panel,.chartPanel,.metric,.shift-panel,.fold-panel,.curve-fold,.optics-panel{border-color:#ead7da;box-shadow:0 2px 10px #68233106}
+h2,h3,.fold-panel>summary,.chartHeading strong{color:#752333}
+label{color:#63434a}.mini,.legend,.fold-hint,.fold-panel .summary-mini{color:#866971}
+input,textarea,select{border-color:#dfc8cd;color:#38252a}
+input[type=range]{accent-color:#bd283c}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid #bd283c;outline-offset:2px}
+.toggle-config,button.secondary{background:#fff7f7;border-color:#e5bdc5;color:#9b2538}
+.toggle-config:hover,button.secondary:hover{background:#fbe8ec}
+button.action,.toggles button.active{background:#bd283c;color:#fff;border-color:#bd283c}
+.toggles button{background:#fff1f3;color:#9b2538;border-color:#edcbd2}
+.metric.primary{background:#fff3f5;border-color:#dca3ae}
+.metric.primary .value{color:#b32239}
+.metric .name{color:#866971}
+.reading>div{background:#fff0f3}.reading span{color:#88636d}.reading b{color:#b32239}
+.optics-advanced{background:#fff9fa;border-color:#ecd3d9}.optics-advanced summary{color:#9b2538}
+.optics-drawing{background:#fffbfc;border-color:#efdee2}
+.fold-panel>summary:hover,.curve-fold>summary:hover{background:#fff5f7}
+
 </style>
 </head>
 <body><main class="shell">
-<header><div><h1>GFF · ΔEF / EFPP 光路与光谱联动演示 V5</h1><p>输入目标曲线与实际曲线，调整实际曲线的波长和幅度偏移，观察 EF 残余误差</p></div><span class="mini">离线可用 · 单文件 HTML</span></header>
-<div class="layout" id="layout"><aside class="panel" id="configPanel">
+
+<div class="layout config-hidden" id="layout"><aside class="panel" id="configPanel">
 <div class="panel-head"><h2>曲线配置</h2><span class="mini">支持函数 / 采样点</span></div>
 <div class="pair"><div><label for="xMin">波长起点 (nm)</label><input id="xMin" type="number" value="1520" step="0.1"></div><div><label for="xMax">波长终点 (nm)</label><input id="xMax" type="number" value="1580" step="0.1"></div></div>
 <label for="step">计算采样步长 (nm)</label><input id="step" type="number" value="0.01" min="0.001" max="10" step="0.01">
@@ -65,16 +89,16 @@ button.action{background:#1f5fc2;color:white;border:0;padding:10px 14px;border-r
 <div class="note">定义：角度变化造成的光谱坐标缩放与手动平移叠加；EF(λ) = 目标曲线(λ) − 实际曲线调整后(λ)。纵轴单位与输入幅度一致（例如 dB）。</div>
 </aside><section class="work">
 <div class="shift-panel">
- <div class="shift-header"><h2>实际曲线平移</h2><div class="buttonrow" style="margin:0"><button id="toggleConfig" type="button" class="toggle-config" aria-expanded="true" aria-controls="configPanel">◀ 隐藏左侧配置</button><button id="reset" type="button" class="secondary">平移归零</button><button id="export" type="button" class="action">导出 CSV</button></div></div>
+ <div class="shift-header"><h2>实际曲线平移</h2><div class="buttonrow" style="margin:0"><button id="toggleConfig" type="button" class="toggle-config" aria-expanded="false" aria-controls="configPanel">▶ 展开左侧配置</button><button id="reset" type="button" class="secondary">平移归零</button></div></div>
  <div class="shift-grid">
-  <div class="shift-control"><label for="dx">左右移动 Δλ (nm) · 最小步进 0.0001 nm</label><input type="range" id="dxSlider" min="-8" max="8" step="0.0001" value="0"><input id="dx" type="number" value="0" step="0.0001"></div>
-  <div class="shift-control"><label for="dy">上下移动 Δy（曲线幅度单位）</label><input type="range" id="dySlider" min="-2" max="2" step="0.01" value="0"><input id="dy" type="number" value="0" step="0.01"></div>
+  <div class="shift-control"><label for="dx">Δλ (nm) · 步进 0.0001</label><input type="range" id="dxSlider" min="-8" max="8" step="0.0001" value="0"><input id="dx" type="number" value="0" step="0.0001"></div>
+  <div class="shift-control"><label for="dy">Δy · 幅度</label><input type="range" id="dySlider" min="-2" max="2" step="0.01" value="0"><input id="dy" type="number" value="0" step="0.01"></div>
  </div>
  <div class="shift-note">正 Δλ 向右移动；正 Δy 向上移动。两项输入和滑块变化后，图表与指标立即更新。</div>
  <div id="error" class="error" role="alert"></div>
 </div>
-<details class="fold-panel" id="opticsFold" open>
- <summary><span>③ 准直器角度 ↔ GFF 膜片 ↔ 波长联动</span><span class="summary-mini">可展开 / 隐藏；默认仅暴露旋转控制，详细参数可在内部继续展开</span></summary>
+<details class="fold-panel" id="opticsFold">
+ <summary><span>准直器 · 胶水示意与旋转</span><span class="summary-mini">展开 / 收起 ▾</span></summary>
  <div class="fold-body">
  <div class="optics-panel" style="margin:0;border:none;box-shadow:none;padding:0">
   <div class="optics-layout">
@@ -114,8 +138,8 @@ button.action{background:#1f5fc2;color:white;border:0;padding:10px 14px;border-r
     <div class="calibrate" id="filmControls"><div><label for="neff">膜层有效折射率 n_eff</label><input id="neff" type="number" value="1.8" min="1.01" max="5" step="0.01"/></div><div class="optics-note" style="grid-column:span 2;align-self:center">按入射角的绝对值计算光谱蓝移；基准曲线定义在 θ₀，旋转后相对基准产生位移。</div></div>
     <div id="linearControls" hidden><label for="slope">实测斜率 k（nm/°）：λ 偏移 = k × Δθ</label><input id="slope" type="number" value="-0.25" step="0.0001"/><div class="optics-note">斜率请依据你的装调实测数据填写；线性模型不代表完整薄膜物理。</div></div>
     </details>
-    <div class="reading"><div><span>当前入射角 θ</span><b id="angleActual">3.000°</b></div><div><span>角度引起的波长偏移</span><b id="angleShift">0.000000 nm</b></div><div><span>总波长偏移</span><b id="totalShift">0.000000 nm</b></div></div>
-    <div class="optics-actions"><button id="angleReset" type="button" class="secondary">角度归零</button><button id="playAngle" type="button" class="secondary">▶ 自动往复演示</button><span class="optics-note">角度滑块精度 0.001°；原手动波长平移 0.0001 nm 保留。</span></div>
+    <div class="reading"><div><span>当前入射角 θ</span><b id="angleActual">3.000°</b></div><div><span>波长偏移</span><b id="totalShift">0.000000 nm</b></div></div>
+    <div class="optics-actions"><button id="angleReset" type="button" class="secondary">角度归零</button><span class="optics-note">角度滑块精度 0.001°；原手动波长平移 0.0001 nm 保留。</span></div>
    </div>
   </div>
   <div class="optics-note" style="margin-top:7px">准直器通过一层胶水与 GFF 膜片贴合，转动时围绕贴合位置改变入射角。该图用于说明结构与联动关系，不代表真实机械尺寸。</div>
@@ -123,10 +147,10 @@ button.action{background:#1f5fc2;color:white;border:0;padding:10px 14px;border-r
  </div>
 </details>
 <div class="metrics"><div class="metric primary"><div class="name">ΔEF = max(ΔEF₁, ΔEF₂, ΔEF₃)</div><div id="delta" class="value">—</div></div><div class="metric primary"><div class="name">EFPP = max(EF) − min(EF)</div><div id="efpp" class="value">—</div></div><div class="metric detail"><div class="name formula">ΔEF₁ = |EF(1524.3 nm) − EF(1572.3 nm)|</div><div id="d1" class="value">—</div></div><div class="metric detail"><div class="name formula">ΔEF₂ = |EF(1525.3 nm) − EF(1571.3 nm)|</div><div id="d2" class="value">—</div></div><div class="metric detail"><div class="name formula">ΔEF₃ = |EF(1526.3 nm) − EF(1570.3 nm)|</div><div id="d3" class="value">—</div></div></div>
-<div class="chartPanel"><div class="chartHeading"><strong>① 目标曲线与实际曲线</strong><div class="legend"><span><i class="dot" style="background:#2067c7"></i>目标曲线</span><span><i class="dot" style="background:#e58a2b"></i>实际曲线（移动后）</span></div></div><svg id="topChart" class="chart" role="img" aria-label="目标曲线与平移后的实际曲线"></svg></div>
-<div class="chartPanel"><div class="chartHeading"><strong>② EF 残余误差</strong><div class="legend"><span><i class="dot" style="background:#188576"></i>EF = 目标曲线 − 实际曲线</span><span><i class="dot" style="background:#d65765"></i>三组端点</span></div></div><svg id="bottomChart" class="chart bottom" role="img" aria-label="EF残余误差以及三个左右波长端点对应差异"></svg><div class="foot" id="info">三组端点位置均按指定波长精确求值；EFPP 按设定步长在有效波长区间扫描。</div></div>
-<details class="fold-panel trend-panel" id="trendFold" open>
- <summary><span>④ EFPP 与 ΔEF 随波长偏移变化</span><span class="summary-mini">横坐标：总波长偏移；纵坐标：指标值；可展开 / 隐藏</span></summary>
+<details class="curve-fold" id="mainCurveFold" open><summary class="chartHeading"><strong>目标曲线与实际曲线</strong><div class="legend"><span><i class="dot" style="background:#2067c7"></i>目标曲线</span><span><i class="dot" style="background:#e58a2b"></i>实际曲线</span></div><span class="fold-hint">展开 / 收起 ▾</span></summary><div class="curve-body"><svg id="topChart" class="chart" role="img" aria-label="目标曲线与平移后的实际曲线"></svg></div></details>
+<details class="curve-fold" id="efFold" open><summary class="chartHeading"><strong>EF</strong><div class="legend"><span><i class="dot" style="background:#188576"></i>EF = 目标曲线 − 实际曲线</span><span><i class="dot" style="background:#d65765"></i>三组端点</span></div><span class="fold-hint">展开 / 收起 ▾</span></summary><div class="curve-body"><svg id="bottomChart" class="chart bottom" role="img" aria-label="EF残余误差以及三个左右波长端点对应差异"></svg><div class="foot" id="info">三组端点位置均按指定波长精确求值；EFPP 按设定步长在有效波长区间扫描。</div></div></details>
+<details class="fold-panel trend-panel" id="trendFold">
+ <summary><span>EFPP / ΔEF 趋势</span><span class="summary-mini">展开 / 收起 ▾</span></summary>
  <div class="fold-body">
   <div class="chartPanel">
    <div class="chartHeading"><strong>EFPP / ΔEF — 波长偏移趋势图</strong><div class="legend"><span><i class="dot" style="background:#245ec7"></i>EFPP</span><span><i class="dot" style="background:#db6b1a"></i>ΔEF</span><span class="limit-tag">上限：EFPP = 0.6，ΔEF = 0.3</span></div></div>
@@ -286,7 +310,6 @@ function drawOptics(state,manualShift){
  $('angleText').setAttribute('y',y2+(theta>=0?30:-22));
  $('angleText').textContent=`θ = ${state.theta.toFixed(3)}°`;
  $('angleActual').textContent=state.theta.toFixed(3)+'°';
- $('angleShift').textContent=(state.shift>=0?'+':'')+state.shift.toFixed(6)+' nm';
  $('totalShift').textContent=(state.shift+manualShift>=0?'+':'')+(state.shift+manualShift).toFixed(6)+' nm';
 }
 
@@ -321,6 +344,7 @@ function render(){
   currentRows=res.map((p,i)=>[p.x,base[i].y,ref[i].y,p.y]);
 
   // 趋势图横坐标固定显示总波长偏移 -1 nm 至 +1 nm
+  if($('trendFold').open){
   const trendMin=-1;
   const trendMax=1;
   const trendCount=240;
@@ -337,6 +361,7 @@ function render(){
   ],trendMin,trendMax,totalShift);
   $('trendInfo').textContent=`横坐标固定为总波长偏移 Δλ（−1 nm 至 +1 nm）；当前总偏移为 ${totalShift.toFixed(6)} nm。图中蓝色虚线为 EFPP 上限 0.6，橙色虚线为 ΔEF 上限 0.3。${Math.abs(totalShift)>1?'当前工作点超出显示范围，趋势曲线仍按 −1 nm 至 +1 nm 绘制。':''}`;
 
+  }
   const covered=validDif.length===3?'':'注意：部分指定端点超出了输入的采样波长范围，相关指标不可计算。';
   $('info').textContent=`角度引起的波长偏移 ${angle.shift.toFixed(6)} nm；总波长偏移 ${totalShift.toFixed(6)} nm；EFPP 在有效公共波长区间内按 ${step} nm 步长取极值；ΔEF 三组端点分别精确计算。${Number.isFinite(delta)?'主导项：ΔEF'+(dominant+1)+'。':''} ${covered}`;
  }catch(e){
@@ -356,14 +381,9 @@ $('angleModel').addEventListener('change',()=>{$('filmControls').hidden=$('angle
 $('angle').addEventListener('input',()=>{let a=Number($('angle').value);if(Number.isFinite(a)&&a>=-8&&a<=8)$('angleSlider').value=a;render()});
 $('angleSlider').addEventListener('input',()=>{$('angle').value=$('angleSlider').value;render()});
 $('angleReset').addEventListener('click',()=>{$('angle').value=0;$('angleSlider').value=0;render()});
-$('playAngle').addEventListener('click',()=>{if(angleAnimation){cancelAnimationFrame(angleAnimation);angleAnimation=null;$('playAngle').textContent='▶ 自动往复演示';return;}
- $('playAngle').textContent='■ 停止演示';let last=performance.now();const tick=now=>{if(!angleAnimation)return;let d=Math.min((now-last)/1000,.1);last=now;let a=Number($('angle').value)+angleDirection*d*0.9;if(a>8){a=8;angleDirection=-1}else if(a< -8){a=-8;angleDirection=1} $('angle').value=a.toFixed(3);$('angleSlider').value=a.toFixed(3);render();angleAnimation=requestAnimationFrame(tick)};angleAnimation=requestAnimationFrame(tick);});
 for(const id of ['dx','dy']){$(id).addEventListener('input',()=>syncShift(id,$(id).value));$(id+'Slider').addEventListener('input',()=>syncShift(id,$(id+'Slider').value))}
 $('reset').addEventListener('click',()=>{for(const id of ['dx','dy'])syncShift(id,'0');render()});
-$('export').addEventListener('click',()=>{
- if(!currentRows.length)return;
- const csv='wavelength_nm,target_curve,shifted_actual_curve,EF\n'+currentRows.map(row=>row.map(n=>Number.isFinite(n)?n.toFixed(8):'').join(',')).join('\n');
- const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='GFF_EF_curve.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-});
+
+$('trendFold').addEventListener('toggle',()=>{if($('trendFold').open)render()});
 render();
 </script></body></html>
