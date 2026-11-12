@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GFF 增益平坦滤波器 | ΔEF & EFPP 交互演示</title>
+<style>
+:root{font-family:Inter,"Microsoft YaHei",Arial,sans-serif;color:#172641;background:#f2f5fa}
+*{box-sizing:border-box}body{margin:0}.shell{max-width:1480px;margin:0 auto;padding:18px 22px 32px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}h1{font-size:23px;margin:0}header p{margin:5px 0 0;color:#64748b;font-size:13px}
+.mini{font-size:12px;color:#607086}.layout{display:grid;grid-template-columns:minmax(300px,350px) minmax(0,1fr);gap:16px}
+.panel,.chartPanel,.metric{background:white;border:1px solid #dbe3ee;border-radius:12px;box-shadow:0 3px 16px #1e35510b}
+.panel{padding:17px;max-height:calc(100vh - 104px);overflow:auto}.layout.config-hidden{grid-template-columns:minmax(0,1fr)}.layout.config-hidden .panel{display:none}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.panel-head h2{margin:0}.toggle-config{white-space:nowrap;cursor:pointer;border:1px solid #cbd8e8;background:#fff;color:#1f4f95;border-radius:8px;padding:9px 12px;font-weight:650}.toggle-config:hover{background:#eaf2ff}.shift-panel{background:#fff;border:1px solid #dbe3ee;border-radius:12px;padding:12px 16px;margin-bottom:11px;box-shadow:0 3px 16px #1e35510b}.shift-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.shift-header h2{margin:0}.shift-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.shift-control{display:grid;grid-template-columns:minmax(0,1fr) 118px;column-gap:10px;align-items:end}.shift-control label{grid-column:1 / -1}.shift-control input[type=range]{align-self:center}.shift-control input[type=number]{padding:7px}.shift-note{color:#6b7e97;font-size:11px;margin-top:7px}h2{font-size:15px;margin:0 0 12px;color:#243953}h3{font-size:13px;margin:16px 0 8px;color:#354966}
+label{display:block;font-size:12px;font-weight:650;color:#43536b;margin:9px 0 5px}
+textarea,input,select{border:1px solid #cad6e6;border-radius:7px;background:#fff;color:#152941;font-family:inherit;font-size:13px;padding:8px;width:100%}
+textarea{resize:vertical;min-height:84px;font:12px/1.4 Consolas,monospace}input[type=number]{font-variant-numeric:tabular-nums}input[type=range]{padding:0;accent-color:#315ebd}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.toggles{display:flex;gap:8px;margin:7px 0}.toggles button{flex:1;padding:7px;background:#eaf1ff;color:#2754a6;border:1px solid #d3dff7;border-radius:7px;cursor:pointer}.toggles button.active{background:#285db7;color:white}
+button.action{background:#1f5fc2;color:white;border:0;padding:10px 14px;border-radius:7px;cursor:pointer;font-weight:600}button.secondary{background:#edf2fa;border:1px solid #dae2ee;color:#2b4666;padding:9px 12px;border-radius:7px;cursor:pointer}
+.buttonrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.note{color:#6b7e97;font-size:11px;line-height:1.6;margin-top:6px}.error{background:#fff1f2;color:#b4233a;border-radius:7px;padding:8px 10px;font-size:12px;margin:8px 0;display:none}
+.work{min-width:0}.metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin-bottom:11px}.metrics .metric.primary{grid-column:span 3}.metrics .metric.detail{grid-column:span 2}.metric .name.formula{font-size:12px;line-height:1.5;white-space:normal}.metric{padding:12px 10px}.metric .name{font-size:11px;color:#607086}.metric .value{font-size:19px;font-weight:750;font-variant-numeric:tabular-nums;margin-top:6px}.metric.primary{border-color:#9bb5f0;background:#f7faff}.metric.primary .value{color:#2456b3}
+.chartPanel{padding:13px 16px;margin-bottom:11px}.chartHeading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}.chartHeading strong{font-size:14px}.legend{display:flex;gap:13px;align-items:center;font-size:11px;color:#64748b;flex-wrap:wrap}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.chart{width:100%;height:clamp(235px,32vh,385px);display:block}.chart.bottom{height:clamp(235px,31vh,365px)}.foot{color:#677b92;font-size:11px;margin-top:5px;line-height:1.6}
+@media(max-width:1030px){.layout{grid-template-columns:1fr}.panel{max-height:none}.metrics{grid-template-columns:repeat(6,1fr)}.chart{height:270px}.chart.bottom{height:260px}}@media(max-width:600px){.shell{padding:12px}.metrics{grid-template-columns:repeat(2,1fr)}header{display:block}h1{font-size:19px}.shift-grid{grid-template-columns:1fr}.metrics .metric.primary,.metrics .metric.detail{grid-column:span 6}}
+
+/* 光路联动 */
+.optics-panel{background:white;border:1px solid #dbe3ee;border-radius:12px;padding:13px 16px;margin-bottom:11px;box-shadow:0 3px 16px #1e35510b}
+.optics-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.optics-head h2{margin:0}.optics-layout{display:grid;grid-template-columns:minmax(260px,1.05fr) minmax(300px,1fr);gap:14px;align-items:center}
+.optics-drawing{width:100%;height:220px;background:#f7faff;border:1px solid #e0e9f6;border-radius:10px}
+.optics-controls{display:grid;gap:7px}.optics-controls label{margin:0 0 3px}.angle-row{display:grid;grid-template-columns:1fr 114px;align-items:center;gap:9px}
+.calibrate{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.reading{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.reading>div{background:#f1f6ff;border-radius:7px;padding:7px 9px;min-width:0}.reading span{display:block;font-size:10px;color:#536783}.reading b{display:block;font-size:15px;color:#2053aa;margin-top:3px;white-space:nowrap}
+.optics-advanced{border:1px solid #dce6f3;border-radius:9px;padding:8px 11px;background:#fafcff}.optics-advanced summary{cursor:pointer;font-size:12px;font-weight:650;color:#315984;user-select:none}.optics-advanced[open] summary{margin-bottom:10px}.optics-advanced .calibrate{margin-bottom:9px}.optics-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.optics-note{font-size:11px;color:#667891;line-height:1.5}
+@media(max-width:1200px){.optics-layout{grid-template-columns:1fr}.optics-drawing{height:190px}}
+@media(max-width:600px){.calibrate{grid-template-columns:1fr 1fr}.reading{grid-template-columns:1fr 1fr}.optics-drawing{height:170px}}
+
+.fold-panel{background:white;border:1px solid #dbe3ee;border-radius:12px;margin-bottom:11px;box-shadow:0 3px 16px #1e35510b;overflow:hidden}
+.fold-panel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;font-size:15px;font-weight:700;color:#243953;background:#fff;user-select:none}
+.fold-panel>summary::-webkit-details-marker{display:none}.fold-panel .summary-mini{font-size:12px;font-weight:400;color:#607086}
+.fold-body{padding:0 16px 13px 16px}.trend-panel .chartPanel{margin:0;border:none;box-shadow:none;padding:0}.trend-note{font-size:11px;color:#667891;line-height:1.55;margin-top:6px}
+.limit-tag{font-size:11px;color:#62748c}
+
+</style>
+</head>
+<body><main class="shell">
+<header><div><h1>GFF · ΔEF / EFPP 光路与光谱联动演示 V5</h1><p>输入目标曲线与实际曲线，调整实际曲线的波长和幅度偏移，观察 EF 残余误差</p></div><span class="mini">离线可用 · 单文件 HTML</span></header>
+<div class="layout" id="layout"><aside class="panel" id="configPanel">
+<div class="panel-head"><h2>曲线配置</h2><span class="mini">支持函数 / 采样点</span></div>
+<div class="pair"><div><label for="xMin">波长起点 (nm)</label><input id="xMin" type="number" value="1520" step="0.1"></div><div><label for="xMax">波长终点 (nm)</label><input id="xMax" type="number" value="1580" step="0.1"></div></div>
+<label for="step">计算采样步长 (nm)</label><input id="step" type="number" value="0.01" min="0.001" max="10" step="0.01">
+<h3><span style="color:#2067c7">●</span> 目标曲线</h3><div class="toggles"><button type="button" id="targetFunction" class="active">函数</button><button type="button" id="targetSamples">采样点</button></div><div id="targetFunctionWrap"><label>函数（自变量 x，单位 nm）</label><textarea id="targetFormula" spellcheck="false">0.45*sin((x-1520)/8) + 0.18*cos((x-1520)/2.8) + 0.012*(x-1550)</textarea></div><div id="targetSamplesWrap" hidden><label>采样点（波长,数值；逐行填写或粘贴 CSV）</label><textarea id="targetData" spellcheck="false">1520,0.2
+1530,0.55
+1540,0.1
+1550,-0.35
+1560,0.3
+1570,0.55
+1580,0.1</textarea></div>
+<h3><span style="color:#e58a2b">●</span> 实际曲线</h3><div class="toggles"><button type="button" id="referenceFunction" class="active">函数</button><button type="button" id="referenceSamples">采样点</button></div><div id="referenceFunctionWrap"><label>函数（自变量 x，单位 nm）</label><textarea id="referenceFormula" spellcheck="false">0.42*sin((x-1520)/8) + 0.16*cos((x-1520)/2.8) + 0.012*(x-1550)</textarea></div><div id="referenceSamplesWrap" hidden><label>采样点（波长,数值）</label><textarea id="referenceData" spellcheck="false">1520,0.16
+1530,0.49
+1540,0.12
+1550,-0.30
+1560,0.27
+1570,0.49
+1580,0.14</textarea></div>
+<div class="note">函数支持 + − * / ^、括号、sin/cos/tan、abs、exp、log、sqrt、pow、min、max、pi、e；采样点间线性插值，不向数据区间外推。</div>
+<div class="note">定义：角度变化造成的光谱坐标缩放与手动平移叠加；EF(λ) = 目标曲线(λ) − 实际曲线调整后(λ)。纵轴单位与输入幅度一致（例如 dB）。</div>
+</aside><section class="work">
+<div class="shift-panel">
+ <div class="shift-header"><h2>实际曲线平移</h2><div class="buttonrow" style="margin:0"><button id="toggleConfig" type="button" class="toggle-config" aria-expanded="true" aria-controls="configPanel">◀ 隐藏左侧配置</button><button id="reset" type="button" class="secondary">平移归零</button><button id="export" type="button" class="action">导出 CSV</button></div></div>
+ <div class="shift-grid">
+  <div class="shift-control"><label for="dx">左右移动 Δλ (nm) · 最小步进 0.0001 nm</label><input type="range" id="dxSlider" min="-8" max="8" step="0.0001" value="0"><input id="dx" type="number" value="0" step="0.0001"></div>
+  <div class="shift-control"><label for="dy">上下移动 Δy（曲线幅度单位）</label><input type="range" id="dySlider" min="-2" max="2" step="0.01" value="0"><input id="dy" type="number" value="0" step="0.01"></div>
+ </div>
+ <div class="shift-note">正 Δλ 向右移动；正 Δy 向上移动。两项输入和滑块变化后，图表与指标立即更新。</div>
+ <div id="error" class="error" role="alert"></div>
+</div>
+<details class="fold-panel" id="opticsFold" open>
+ <summary><span>③ 准直器角度 ↔ GFF 膜片 ↔ 波长联动</span><span class="summary-mini">可展开 / 隐藏；默认仅暴露旋转控制，详细参数可在内部继续展开</span></summary>
+ <div class="fold-body">
+ <div class="optics-panel" style="margin:0;border:none;box-shadow:none;padding:0">
+  <div class="optics-layout">
+   <svg class="optics-drawing" id="opticsDrawing" viewBox="0 0 590 240" role="img" aria-label="准直器通过胶水层贴合GFF膜片并绕贴合位置旋转的动态示意图">
+    <defs><linearGradient id="rayGradient" x1="0" x2="1"><stop offset="0" stop-color="#35abd1"/><stop offset="1" stop-color="#1671c5"/></linearGradient></defs>
+    <path d="M34 120 H548" stroke="#a9b9d0" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <rect x="486" y="26" width="16" height="188" rx="3" fill="#dac7ed" stroke="#815aa6" stroke-width="2"/>
+    <path d="M486 26V214" stroke="#7a55a8" stroke-width="2.5"/>
+    <text x="494" y="18" font-size="12" fill="#6d4d97" text-anchor="middle">GFF 膜片</text>
+    <rect x="475" y="78" width="11" height="84" rx="3" fill="#f6d87e" stroke="#c79219" stroke-width="2" opacity="0.96"/>
+    <text x="480.5" y="70" font-size="12" fill="#9b6a0a" text-anchor="middle">胶水</text>
+    <circle cx="475" cy="120" r="4" fill="#e0aa35" stroke="white" stroke-width="1.2"/>
+    <g id="rayGroup" transform="translate(475 120)">
+     <line id="beamHalo" x1="-136" y1="0" x2="0" y2="0" stroke="#5cc4e4" opacity=".23" stroke-width="16" stroke-linecap="round"/>
+     <line id="beam" x1="-136" y1="0" x2="0" y2="0" stroke="url(#rayGradient)" stroke-width="4" stroke-linecap="round"/>
+     <g id="collimator">
+       <rect x="-142" y="-22" width="142" height="44" rx="8" fill="#d7e7f9" stroke="#527ba6" stroke-width="2"/>
+       <rect x="-25" y="-22" width="25" height="44" rx="4" fill="#9ebfdb" stroke="#527ba6" stroke-width="2"/>
+       <rect x="-130" y="-11" width="61" height="22" rx="4" fill="#718da9"/>
+       <circle cx="-9" cy="0" r="8" fill="#66b8e1" stroke="#287aaf" stroke-width="2"/>
+     </g>
+    </g>
+    <circle cx="475" cy="120" r="4.5" fill="#a75bd1" stroke="white" stroke-width="1.5"/>
+    <path id="angleArc" fill="none" stroke="#df8f3f" stroke-width="2.5"/>
+    <text id="angleText" x="350" y="102" font-size="13" fill="#ac6427" font-weight="bold">θ = 3.00°</text>
+    <text x="88" y="201" font-size="13" fill="#426080">准直器（通过胶水层贴合膜片）</text>
+    <text x="36" y="28" font-size="10" fill="#798ca5">示意图非机械比例；胶水层仅用于结构说明</text>
+   </svg>
+   <div class="optics-controls">
+    <div class="angle-row"><div><label for="angleSlider">准直器机械旋转 Δθ（°）</label><input id="angleSlider" type="range" min="-8" max="8" step="0.001" value="0"/></div><div><label for="angle">Δθ（°）</label><input id="angle" type="number" min="-8" max="8" step="0.001" value="0"/></div></div>
+    <details id="advancedOptics" class="optics-advanced"><summary>展开角度—波长模型及准直器参数配置</summary>
+    <div class="calibrate">
+     <div><label for="baseAngle">基准入射角 θ₀（°）</label><input id="baseAngle" type="number" value="3" min="0" max="20" step="0.01"/></div>
+     <div><label for="centerWave">标定中心波长（nm）</label><input id="centerWave" type="number" value="1550" min="1" step="0.1"/></div>
+     <div><label for="angleModel">角度—波长模型</label><select id="angleModel"><option value="film">薄膜理论</option><option value="linear">实测线性标定</option></select></div>
+    </div>
+    <div class="calibrate" id="filmControls"><div><label for="neff">膜层有效折射率 n_eff</label><input id="neff" type="number" value="1.8" min="1.01" max="5" step="0.01"/></div><div class="optics-note" style="grid-column:span 2;align-self:center">按入射角的绝对值计算光谱蓝移；基准曲线定义在 θ₀，旋转后相对基准产生位移。</div></div>
+    <div id="linearControls" hidden><label for="slope">实测斜率 k（nm/°）：λ 偏移 = k × Δθ</label><input id="slope" type="number" value="-0.25" step="0.0001"/><div class="optics-note">斜率请依据你的装调实测数据填写；线性模型不代表完整薄膜物理。</div></div>
+    </details>
+    <div class="reading"><div><span>当前入射角 θ</span><b id="angleActual">3.000°</b></div><div><span>角度引起的波长偏移</span><b id="angleShift">0.000000 nm</b></div><div><span>总波长偏移</span><b id="totalShift">0.000000 nm</b></div></div>
+    <div class="optics-actions"><button id="angleReset" type="button" class="secondary">角度归零</button><button id="playAngle" type="button" class="secondary">▶ 自动往复演示</button><span class="optics-note">角度滑块精度 0.001°；原手动波长平移 0.0001 nm 保留。</span></div>
+   </div>
+  </div>
+  <div class="optics-note" style="margin-top:7px">准直器通过一层胶水与 GFF 膜片贴合，转动时围绕贴合位置改变入射角。该图用于说明结构与联动关系，不代表真实机械尺寸。</div>
+ </div>
+ </div>
+</details>
+<div class="metrics"><div class="metric primary"><div class="name">ΔEF = max(ΔEF₁, ΔEF₂, ΔEF₃)</div><div id="delta" class="value">—</div></div><div class="metric primary"><div class="name">EFPP = max(EF) − min(EF)</div><div id="efpp" class="value">—</div></div><div class="metric detail"><div class="name formula">ΔEF₁ = |EF(1524.3 nm) − EF(1572.3 nm)|</div><div id="d1" class="value">—</div></div><div class="metric detail"><div class="name formula">ΔEF₂ = |EF(1525.3 nm) − EF(1571.3 nm)|</div><div id="d2" class="value">—</div></div><div class="metric detail"><div class="name formula">ΔEF₃ = |EF(1526.3 nm) − EF(1570.3 nm)|</div><div id="d3" class="value">—</div></div></div>
+<div class="chartPanel"><div class="chartHeading"><strong>① 目标曲线与实际曲线</strong><div class="legend"><span><i class="dot" style="background:#2067c7"></i>目标曲线</span><span><i class="dot" style="background:#e58a2b"></i>实际曲线（移动后）</span></div></div><svg id="topChart" class="chart" role="img" aria-label="目标曲线与平移后的实际曲线"></svg></div>
+<div class="chartPanel"><div class="chartHeading"><strong>② EF 残余误差</strong><div class="legend"><span><i class="dot" style="background:#188576"></i>EF = 目标曲线 − 实际曲线</span><span><i class="dot" style="background:#d65765"></i>三组端点</span></div></div><svg id="bottomChart" class="chart bottom" role="img" aria-label="EF残余误差以及三个左右波长端点对应差异"></svg><div class="foot" id="info">三组端点位置均按指定波长精确求值；EFPP 按设定步长在有效波长区间扫描。</div></div>
+<details class="fold-panel trend-panel" id="trendFold" open>
+ <summary><span>④ EFPP 与 ΔEF 随波长偏移变化</span><span class="summary-mini">横坐标：总波长偏移；纵坐标：指标值；可展开 / 隐藏</span></summary>
+ <div class="fold-body">
+  <div class="chartPanel">
+   <div class="chartHeading"><strong>EFPP / ΔEF — 波长偏移趋势图</strong><div class="legend"><span><i class="dot" style="background:#245ec7"></i>EFPP</span><span><i class="dot" style="background:#db6b1a"></i>ΔEF</span><span class="limit-tag">上限：EFPP = 0.6，ΔEF = 0.3</span></div></div>
+   <svg id="trendChart" class="chart bottom" role="img" aria-label="EFPP与ΔEF随总波长偏移变化的趋势图"></svg>
+   <div class="trend-note" id="trendInfo">将根据当前曲线、角度模型和纵向偏移，扫描总波长偏移并绘制 EFPP 与 ΔEF 的变化曲线，同时标出上限线和当前工作点。</div>
+  </div>
+ </div>
+</details>
+</section></div></main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+let modes={target:'function',reference:'function'}, currentRows=[], angleAnimation=null, angleDirection=1;
+const pairs=[[1524.3,1572.3],[1525.3,1571.3],[1526.3,1570.3]];
+const COLORS=['#d65765','#944fc3','#c58b21'];
+function numeric(id){const n=Number($(id).value);if(!Number.isFinite(n))throw Error(id+' 输入必须是有限数字');return n;}
+function compiler(expr){
+ let s=expr.trim().replace(/\bPI\b/g,'pi').replace(/\^/g,'**').replace(/−/g,'-');
+ if(!s || !/^[\w\s+\-*/().,]*$/.test(s))throw Error('函数存在不支持的字符');
+ const allowed=new Set(['x','sin','cos','tan','asin','acos','atan','abs','exp','log','sqrt','pow','min','max','floor','ceil','round','pi','e']);
+ const names=s.match(/[A-Za-z_][A-Za-z_0-9]*/g)||[];
+ for(const v of names)if(!allowed.has(v))throw Error('函数中不支持 '+v+'；请使用 x 和所列数学函数');
+ let fn;try{fn=new Function('x','const {sin,cos,tan,asin,acos,atan,abs,exp,log,sqrt,pow,min,max,floor,ceil,round,PI:pi,E:e}=Math; return ('+s+');');}
+ catch(e){throw Error('函数语法错误：'+e.message)}
+ return x=>{const v=fn(x);return typeof v==='number'&&Number.isFinite(v)?v:NaN};
+}
+function sampler(data){
+ let points=[];
+ for(let [i,line] of data.split(/\r?\n/).entries()){
+  line=line.trim();if(!line || line.startsWith('#') || /^(wavelength|波长|lambda)/i.test(line))continue;
+  const tokens=line.split(/[\s,;\t]+/).filter(Boolean);
+  if(tokens.length!==2 || !tokens.every(t=>t!==''&&Number.isFinite(Number(t))))throw Error('采样点第 '+(i+1)+' 行需要两个数值：波长,幅度');
+  points.push([+tokens[0],+tokens[1]]);
+ }
+ if(points.length<2)throw Error('每条采样曲线至少需要两个有效点');
+ points.sort((a,b)=>a[0]-b[0]);
+ for(let i=1;i<points.length;i++)if(points[i][0]<=points[i-1][0])throw Error('采样点波长不能重复');
+ return x=>{if(x<points[0][0]-1e-8||x>points[points.length-1][0]+1e-8)return NaN;
+  let lo=0,hi=points.length-1;while(hi-lo>1){let m=(lo+hi)>>1;if(points[m][0]<x)lo=m;else hi=m;}
+  const [xa,ya]=points[lo],[xb,yb]=points[hi];return ya+(yb-ya)*(x-xa)/(xb-xa);
+ };
+}
+function curve(key){return modes[key]==='function'?compiler($(key+'Formula').value):sampler($(key+'Data').value)}
+function numberText(x){return Number.isFinite(x)?x.toFixed(6):'—'}
+function syncShift(which,value){let input=$(which),slide=$(which+'Slider');input.value=value;if(value!=='' && Number.isFinite(+value)){let v=Number(value);if(v>=+slide.min&&v<=+slide.max)slide.value=v}render();}
+function updateMode(key,mode){modes[key]=mode;$(key+'Function').classList.toggle('active',mode==='function');$(key+'Samples').classList.toggle('active',mode==='samples');$(key+'FunctionWrap').hidden=mode!=='function';$(key+'SamplesWrap').hidden=mode!=='samples';render()}
+function svgEl(tag,attrs,text){let e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(let k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;return e}
+function plot(svgId,series,xmin,xmax,markers=[],highlightPair=-1){
+ const svg=$(svgId),W=1100,H=355,m={l:65,r:21,t:22,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b;
+ svg.replaceChildren();svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('preserveAspectRatio','none');
+ const vals=series.flatMap(s=>s.rows.filter(p=>Number.isFinite(p.y)).map(p=>p.y));
+ if(!vals.length)return;
+ let ymin=Math.min(...vals),ymax=Math.max(...vals);let gap=Math.max((ymax-ymin)*0.13,0.08);ymin-=gap;ymax+=gap;
+ const X=x=>m.l+(x-xmin)/(xmax-xmin)*pw,Y=y=>m.t+(ymax-y)/(ymax-ymin)*ph;
+ for(let i=0;i<=5;i++){
+  const y=m.t+ph*i/5,v=ymax-(ymax-ymin)*i/5;
+  svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:y,y2:y,stroke:'#e7edf4','stroke-width':1}));
+  svg.appendChild(svgEl('text',{x:m.l-9,y:y+4,'text-anchor':'end','font-size':13,fill:'#65778f'},v.toFixed(2)));
+ }
+ for(let i=0;i<=6;i++){let v=xmin+(xmax-xmin)*i/6,x=X(v);
+  svg.appendChild(svgEl('line',{x1:x,x2:x,y1:m.t,y2:H-m.b,stroke:'#f0f4f8'}));
+  svg.appendChild(svgEl('text',{x,y:H-m.b+24,'text-anchor':'middle','font-size':13,fill:'#65778f'},v.toFixed(1)));
+ }
+ svg.appendChild(svgEl('text',{x:W/2,y:H-7,'text-anchor':'middle','font-size':13,fill:'#62748c'},'波长 λ (nm)'));
+ if(ymin<0&&ymax>0)svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(0),y2:Y(0),stroke:'#a2b2c4','stroke-width':1.5,'stroke-dasharray':'5 5'}));
+ const defs=svgEl('defs',{}),clip=svgEl('clipPath',{id:svgId+'Clip'});clip.appendChild(svgEl('rect',{x:m.l,y:m.t,width:pw,height:ph}));defs.appendChild(clip);svg.appendChild(defs);
+ const group=svgEl('g',{'clip-path':`url(#${svgId}Clip)`});svg.appendChild(group);
+ for(const s of series){let paths=[],cmd='';for(const p of s.rows){if(Number.isFinite(p.y)){cmd+=(cmd?' L ':' M ')+X(p.x).toFixed(2)+','+Y(p.y).toFixed(2)}else if(cmd){paths.push(cmd);cmd=''}}if(cmd)paths.push(cmd);
+  for(const d of paths)group.appendChild(svgEl('path',{d,fill:'none',stroke:s.color,'stroke-width':s.width||2.8,'stroke-linejoin':'round','stroke-linecap':'round'}));
+ }
+ if(markers.length){for(let i=0;i<markers.length;i++){let mkr=markers[i];if(!Number.isFinite(mkr.y)||mkr.x<xmin||mkr.x>xmax)continue;
+  const color=COLORS[mkr.pair],em=mkr.pair===highlightPair;
+  group.appendChild(svgEl('line',{x1:X(mkr.x),x2:X(mkr.x),y1:m.t,y2:H-m.b,stroke:color,'stroke-width':em?1.6:1,'stroke-dasharray':'5 5',opacity:em?0.7:0.38}));
+  group.appendChild(svgEl('circle',{cx:X(mkr.x),cy:Y(mkr.y),r:em?7:4.5,fill:color,stroke:'white','stroke-width':2}));
+ }}
+}
+
+function computeMetricsForShift(target,reference,ratio,totalShift,dy,xmin,xmax,step){
+ const actual=x=>reference((x-totalShift)/ratio);
+ let min=Infinity,max=-Infinity;
+ for(let i=0,count=Math.ceil((xmax-xmin)/step);i<=count;i++){
+  const x=i===count?xmax:xmin+i*step;
+  const a=target(x),b=actual(x);
+  if(Number.isFinite(a)&&Number.isFinite(b)){
+   const v=a-b-dy;
+   min=Math.min(min,v);max=Math.max(max,v);
+  }
+ }
+ const differences=pairs.map(([a,b])=>{const v1=target(a)-actual(a)-dy,v2=target(b)-actual(b)-dy;return Number.isFinite(v1)&&Number.isFinite(v2)?Math.abs(v1-v2):NaN});
+ const valid=differences.filter(Number.isFinite);
+ return {delta:valid.length===3?Math.max(...valid):NaN,pp:min!==Infinity?max-min:NaN,differences};
+}
+function plotTrend(svgId,series,xmin,xmax,currentX){
+ const svg=$(svgId),W=1100,H=355,m={l:65,r:21,t:22,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b;
+ svg.replaceChildren();svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('preserveAspectRatio','none');
+ const thresholds=[{value:0.6,color:'#245ec7',label:'EFPP上限 0.6'},{value:0.3,color:'#db6b1a',label:'ΔEF上限 0.3'}];
+ const vals=series.flatMap(s=>s.rows.filter(p=>Number.isFinite(p.y)).map(p=>p.y)).concat(thresholds.map(t=>t.value));
+ if(!vals.length)return;
+ let ymin=Math.min(0,...vals),ymax=Math.max(...vals),gap=Math.max((ymax-ymin)*0.12,0.05); ymin=Math.min(0,ymin-gap); ymax+=gap;
+ const X=x=>m.l+(x-xmin)/(xmax-xmin)*pw, Y=y=>m.t+(ymax-y)/(ymax-ymin)*ph;
+ for(let i=0;i<=5;i++){
+  const y=m.t+ph*i/5,v=ymax-(ymax-ymin)*i/5;
+  svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:y,y2:y,stroke:'#e7edf4','stroke-width':1}));
+  svg.appendChild(svgEl('text',{x:m.l-9,y:y+4,'text-anchor':'end','font-size':13,fill:'#65778f'},v.toFixed(2)));
+ }
+ for(let i=0;i<=6;i++){
+  const v=xmin+(xmax-xmin)*i/6,x=X(v);
+  svg.appendChild(svgEl('line',{x1:x,x2:x,y1:m.t,y2:H-m.b,stroke:'#f0f4f8'}));
+  svg.appendChild(svgEl('text',{x,y:H-m.b+24,'text-anchor':'middle','font-size':13,fill:'#65778f'},v.toFixed(2)));
+ }
+ svg.appendChild(svgEl('text',{x:W/2,y:H-7,'text-anchor':'middle','font-size':13,fill:'#62748c'},'总波长偏移 Δλ (nm)'));
+ if(ymin<0&&ymax>0)svg.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(0),y2:Y(0),stroke:'#a2b2c4','stroke-width':1.5,'stroke-dasharray':'5 5'}));
+ const defs=svgEl('defs',{}),clip=svgEl('clipPath',{id:svgId+'Clip'});clip.appendChild(svgEl('rect',{x:m.l,y:m.t,width:pw,height:ph}));defs.appendChild(clip);svg.appendChild(defs);
+ const group=svgEl('g',{'clip-path':`url(#${svgId}Clip)`});svg.appendChild(group);
+ thresholds.forEach(t=>{
+  group.appendChild(svgEl('line',{x1:m.l,x2:W-m.r,y1:Y(t.value),y2:Y(t.value),stroke:t.color,'stroke-width':1.8,'stroke-dasharray':'7 6',opacity:0.85}));
+  svg.appendChild(svgEl('text',{x:W-m.r-2,y:Y(t.value)-6,'text-anchor':'end','font-size':12,fill:t.color},t.label));
+ });
+ for(const s of series){
+  let d='';
+  s.rows.forEach((p,i)=>{if(Number.isFinite(p.y))d+=(d?' L ':' M ')+X(p.x).toFixed(2)+','+Y(p.y).toFixed(2)});
+  group.appendChild(svgEl('path',{d,fill:'none',stroke:s.color,'stroke-width':2.8,'stroke-linejoin':'round','stroke-linecap':'round'}));
+  const cur=s.rows.reduce((best,p)=>!Number.isFinite(p.y)?best:(best===null||Math.abs(p.x-currentX)<Math.abs(best.x-currentX)?p:best),null);
+  if(cur){
+   group.appendChild(svgEl('circle',{cx:X(cur.x),cy:Y(cur.y),r:5.5,fill:s.color,stroke:'white','stroke-width':2}));
+  }
+ }
+ if(Number.isFinite(currentX) && currentX>=xmin && currentX<=xmax){
+  group.appendChild(svgEl('line',{x1:X(currentX),x2:X(currentX),y1:m.t,y2:H-m.b,stroke:'#7f8ea3','stroke-width':1.5,'stroke-dasharray':'6 6',opacity:0.9}));
+  svg.appendChild(svgEl('text',{x:X(currentX),y:m.t+14,'text-anchor':'middle','font-size':12,fill:'#5f738e'},'当前工作点'));
+ }
+}
+
+function angleState(){
+ const base=numeric('baseAngle'),delta=numeric('angle'),wave=numeric('centerWave');
+ if(Math.abs(base)>25 || Math.abs(base+delta)>25)throw Error('演示入射角限定在 ±25° 范围内');
+ if(wave<=0)throw Error('中心波长必须大于零');
+ let ratio=1,shift=0;
+ if($('angleModel').value==='film'){
+  const n=numeric('neff');if(n<=1)throw Error('n_eff 必须大于1');
+  const f=a=>Math.sqrt(1-Math.pow(Math.sin(a*Math.PI/180)/n,2));
+  ratio=f(base+delta)/f(base);shift=wave*(ratio-1);
+ }else{
+  shift=numeric('slope')*delta;ratio=1+shift/wave;
+ }
+ if(ratio<=0)throw Error('波长缩放系数须大于零');
+ return {base,delta,theta:base+delta,wave,ratio,shift};
+}
+function drawOptics(state,manualShift){
+ const theta=Math.max(-25,Math.min(25,state.theta)),rad=theta*Math.PI/180;
+ // 准直器前端中心固定在 GFF 膜片受光点 (475,114)，仅改变其朝向。
+ // 图示为点接触模型；真实机械结构的避让与固定方式需按设备设计确定。
+ $('rayGroup').setAttribute('transform',`translate(475 120) rotate(${-theta})`);
+ const r=63,x2=475,y2=120;
+ $('angleArc').setAttribute('d',`M ${x2-r} ${y2} A ${r} ${r} 0 0 ${theta>=0?0:1} ${x2-r*Math.cos(rad)} ${y2+r*Math.sin(rad)}`);
+ $('angleText').setAttribute('x',x2-140);
+ $('angleText').setAttribute('y',y2+(theta>=0?30:-22));
+ $('angleText').textContent=`θ = ${state.theta.toFixed(3)}°`;
+ $('angleActual').textContent=state.theta.toFixed(3)+'°';
+ $('angleShift').textContent=(state.shift>=0?'+':'')+state.shift.toFixed(6)+' nm';
+ $('totalShift').textContent=(state.shift+manualShift>=0?'+':'')+(state.shift+manualShift).toFixed(6)+' nm';
+}
+
+function render(){
+ const error=$('error');error.style.display='none';
+ try{
+  const xmin=numeric('xMin'),xmax=numeric('xMax'),step=numeric('step'),dx=numeric('dx'),dy=numeric('dy');
+  if(xmax<=xmin || xmax-xmin>2000)throw Error('请设置合理的起止波长（跨度不超过 2000 nm）');
+  if(step<=0||step>10)throw Error('采样步长必须在 0 到 10 nm 之间');
+  const count=Math.ceil((xmax-xmin)/step);if(count>20000)throw Error('采样点过多，请增大步长（上限 20000 点）');
+  const target=curve('target'),reference=curve('reference'),angle=angleState();
+  const totalShift=dx+angle.shift;
+  const actual=x=>reference((x-totalShift)/angle.ratio);
+  const ef=x=>{const a=target(x),b=actual(x);return Number.isFinite(a)&&Number.isFinite(b)?a-b-dy:NaN};
+  drawOptics(angle,dx);
+  const base=[],ref=[],res=[];
+  let min=Infinity,max=-Infinity;
+  for(let i=0;i<=count;i++){
+   let x=i===count?xmax:xmin+i*step,t=target(x),r=actual(x),v=ef(x);
+   base.push({x,y:t});ref.push({x,y:Number.isFinite(r)?r+dy:NaN});res.push({x,y:v});
+   if(Number.isFinite(v)){min=Math.min(min,v);max=Math.max(max,v)}
+  }
+  const differences=pairs.map(([a,b])=>{let v1=ef(a),v2=ef(b);return Number.isFinite(v1)&&Number.isFinite(v2)?Math.abs(v1-v2):NaN});
+  const validDif=differences.filter(Number.isFinite),delta=validDif.length===3?Math.max(...validDif):NaN;
+  const pp=min!==Infinity?max-min:NaN;
+  $('delta').textContent=numberText(delta);$('efpp').textContent=numberText(pp);
+  for(let i=0;i<3;i++)$('d'+(i+1)).textContent=numberText(differences[i]);
+  const dominant=Number.isFinite(delta)?differences.indexOf(delta):-1;
+  let markers=[];pairs.forEach(([a,b],i)=>{markers.push({x:a,y:ef(a),pair:i},{x:b,y:ef(b),pair:i})});
+  plot('topChart',[{rows:base,color:'#2067c7'},{rows:ref,color:'#e58a2b'}],xmin,xmax);
+  plot('bottomChart',[{rows:res,color:'#188576'}],xmin,xmax,markers,dominant);
+  currentRows=res.map((p,i)=>[p.x,base[i].y,ref[i].y,p.y]);
+
+  // 趋势图横坐标固定显示总波长偏移 -1 nm 至 +1 nm
+  const trendMin=-1;
+  const trendMax=1;
+  const trendCount=240;
+  const trendEFPP=[],trendDelta=[];
+  for(let i=0;i<=trendCount;i++){
+   const shift=trendMin+(trendMax-trendMin)*i/trendCount;
+   const m=computeMetricsForShift(target,reference,angle.ratio,shift,dy,xmin,xmax,step);
+   trendEFPP.push({x:shift,y:m.pp});
+   trendDelta.push({x:shift,y:m.delta});
+  }
+  plotTrend('trendChart',[
+   {rows:trendEFPP,color:'#245ec7'},
+   {rows:trendDelta,color:'#db6b1a'}
+  ],trendMin,trendMax,totalShift);
+  $('trendInfo').textContent=`横坐标固定为总波长偏移 Δλ（−1 nm 至 +1 nm）；当前总偏移为 ${totalShift.toFixed(6)} nm。图中蓝色虚线为 EFPP 上限 0.6，橙色虚线为 ΔEF 上限 0.3。${Math.abs(totalShift)>1?'当前工作点超出显示范围，趋势曲线仍按 −1 nm 至 +1 nm 绘制。':''}`;
+
+  const covered=validDif.length===3?'':'注意：部分指定端点超出了输入的采样波长范围，相关指标不可计算。';
+  $('info').textContent=`角度引起的波长偏移 ${angle.shift.toFixed(6)} nm；总波长偏移 ${totalShift.toFixed(6)} nm；EFPP 在有效公共波长区间内按 ${step} nm 步长取极值；ΔEF 三组端点分别精确计算。${Number.isFinite(delta)?'主导项：ΔEF'+(dominant+1)+'。':''} ${covered}`;
+ }catch(e){
+  error.textContent=e.message;error.style.display='block';
+  for(let id of ['delta','efpp','d1','d2','d3'])$(id).textContent='—';
+  $('topChart').replaceChildren();$('bottomChart').replaceChildren(); if($('trendChart'))$('trendChart').replaceChildren();
+  currentRows=[];
+ }
+}
+for(const key of ['target','reference']){
+ for(const mode of ['Function','Samples'])$(key+mode).addEventListener('click',()=>updateMode(key,mode.toLowerCase()==='samples'?'samples':'function'));
+ for(const field of ['Formula','Data'])$(key+field).addEventListener('input',render);
+}
+$('toggleConfig').addEventListener('click',()=>{const hidden=$('layout').classList.toggle('config-hidden');$('toggleConfig').textContent=hidden?'▶ 展开左侧配置':'◀ 隐藏左侧配置';$('toggleConfig').setAttribute('aria-expanded',String(!hidden));});
+for(const id of ['xMin','xMax','step','baseAngle','centerWave','neff','slope'])$(id).addEventListener('input',render);
+$('angleModel').addEventListener('change',()=>{$('filmControls').hidden=$('angleModel').value!=='film';$('linearControls').hidden=$('angleModel').value!=='linear';render()});
+$('angle').addEventListener('input',()=>{let a=Number($('angle').value);if(Number.isFinite(a)&&a>=-8&&a<=8)$('angleSlider').value=a;render()});
+$('angleSlider').addEventListener('input',()=>{$('angle').value=$('angleSlider').value;render()});
+$('angleReset').addEventListener('click',()=>{$('angle').value=0;$('angleSlider').value=0;render()});
+$('playAngle').addEventListener('click',()=>{if(angleAnimation){cancelAnimationFrame(angleAnimation);angleAnimation=null;$('playAngle').textContent='▶ 自动往复演示';return;}
+ $('playAngle').textContent='■ 停止演示';let last=performance.now();const tick=now=>{if(!angleAnimation)return;let d=Math.min((now-last)/1000,.1);last=now;let a=Number($('angle').value)+angleDirection*d*0.9;if(a>8){a=8;angleDirection=-1}else if(a< -8){a=-8;angleDirection=1} $('angle').value=a.toFixed(3);$('angleSlider').value=a.toFixed(3);render();angleAnimation=requestAnimationFrame(tick)};angleAnimation=requestAnimationFrame(tick);});
+for(const id of ['dx','dy']){$(id).addEventListener('input',()=>syncShift(id,$(id).value));$(id+'Slider').addEventListener('input',()=>syncShift(id,$(id+'Slider').value))}
+$('reset').addEventListener('click',()=>{for(const id of ['dx','dy'])syncShift(id,'0');render()});
+$('export').addEventListener('click',()=>{
+ if(!currentRows.length)return;
+ const csv='wavelength_nm,target_curve,shifted_actual_curve,EF\n'+currentRows.map(row=>row.map(n=>Number.isFinite(n)?n.toFixed(8):'').join(',')).join('\n');
+ const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='GFF_EF_curve.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+render();
+</script></body></html>
